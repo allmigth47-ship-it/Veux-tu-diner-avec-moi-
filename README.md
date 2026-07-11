@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Perfect Date Simulator</title>
     <style>
-        /* Reset & Core Standards */
         * { 
             box-sizing: border-box; 
             margin: 0;
@@ -16,11 +15,11 @@
         html, body {
             width: 100%;
             height: 100%;
-            height: 100dvh; /* Utilisation du Viewport Dynamique pour bloquer les sauts de barre d'adresse */
+            height: 100dvh;
             background: #0f172a;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
-            position: fixed; /* Empêche tout défilement parasite du fond sur iOS */
+            position: fixed;
         }
 
         .wrapper {
@@ -32,7 +31,6 @@
             padding: 12px;
         }
 
-        /* Conteneur adaptatif intelligent (Responsive Fluide) */
         .game-container {
             position: relative;
             background-size: cover;
@@ -41,19 +39,16 @@
             border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             width: 100%;
-            max-width: 400px;
-            height: 100%;
-            max-height: 90dvh; /* S'adapte proportionnellement sans jamais dépasser l'écran visible */
+            max-width: 380px;
+            height: 85dvh; /* Hauteur stable */
             border: 2px solid rgba(244, 63, 94, 0.4);
             display: flex;
             flex-direction: column;
             padding: 20px;
             overflow: hidden;
             background-color: #1e293b;
-            transition: background 0.4s ease, border-color 0.4s ease;
         }
 
-        /* Thème alternatif */
         .fond-fleurs {
             background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%) !important;
             border-color: #f43f5e !important;
@@ -63,26 +58,24 @@
             text-shadow: none !important;
         }
 
-        /* Gestion des écrans du jeu */
         .screen { 
             display: none; 
             width: 100%; 
             height: 100%; 
-            flex-direction: column; 
+            flex-direction: column;
+            overflow: hidden;
         }
         .screen.active { 
             display: flex; 
         }
         
-        /* Zone de contenu principale : absorbe le surplus de taille dynamiquement */
+        /* Conteneur avec hauteur maximale stricte pour empêcher l'extension */
         .content-area {
-            flex: 1 1 auto;
+            height: 200px; /* Limite la zone de texte pour laisser la place aux boutons */
             overflow-y: auto;
             margin-bottom: 12px;
             padding-right: 4px;
-            display: flex;
-            flex-direction: column;
-            -webkit-overflow-scrolling: touch; /* Défilement fluide certifié iOS */
+            -webkit-overflow-scrolling: touch;
         }
         .content-area::-webkit-scrollbar { width: 4px; }
         .content-area::-webkit-scrollbar-thumb { background: rgba(244, 63, 94, 0.4); border-radius: 4px; }
@@ -100,7 +93,6 @@
             margin-bottom: 12px;
             border-left: 4px solid #f43f5e;
             white-space: pre-line;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .fond-fleurs .poem-box {
             background: rgba(255, 255, 255, 0.75);
@@ -109,39 +101,35 @@
 
         .question-text {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13.5px;
             line-height: 1.4;
             color: #ffffff;
             margin-bottom: 12px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
-        /* Zone des boutons : préservée à 100% contre l'écrasement */
         .btn-zone {
             width: 100%;
-            flex-shrink: 0;
             margin-top: auto;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 12px 16px;
-            margin: 8px 0;
+            padding: 12px 14px;
+            margin: 6px 0;
             background: rgba(30, 41, 59, 0.95);
             color: #ffffff;
             border: 1px solid rgba(244, 63, 94, 0.4);
             border-radius: 16px;
             cursor: pointer;
-            font-size: 13.5px;
-            font-weight: 500;
+            font-size: 13px;
             text-align: left;
             line-height: 1.4;
-            transition: background 0.2s, transform 0.1s;
+            transition: all 0.2s;
         }
         .btn:active { 
             transform: scale(0.98); 
-            background: rgba(244, 63, 94, 0.2);
         }
         .btn-center { 
             text-align: center; 
@@ -149,21 +137,15 @@
             background: linear-gradient(90deg, #ec4899 0%, #f43f5e 100%); 
             border: none; 
         }
-        .btn-center:active {
-            background: linear-gradient(90deg, #db2777 0%, #e11d48 100%);
-        }
         .fond-fleurs .btn {
             background: rgba(255, 255, 255, 0.95);
             color: #4c0519;
             border: 1px solid #fda4af;
         }
-        .fond-fleurs .btn:active {
-            background: #ffe4e6;
-        }
         
         input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             margin: 8px 0;
             border-radius: 14px;
             border: 1px solid #fda4af;
@@ -171,10 +153,8 @@
             background: rgba(255, 255, 255, 0.95);
             color: #4c0519;
             outline: none;
-            font-family: inherit;
         }
         
-        /* Interface Modale (Popups d'état) */
         .popup-overlay {
             display: none;
             position: absolute;
@@ -188,11 +168,11 @@
         }
         .popup-img { 
             width: 100%; 
-            max-height: 160px; 
+            max-height: 150px; 
             border-radius: 16px; 
             object-fit: cover; 
             margin-bottom: 16px; 
-            background: #334155; /* Fallback si l'image serveur ne charge pas */
+            background: #334155;
         }
     </style>
 </head>
@@ -286,7 +266,7 @@
 
         <div class="popup-overlay" id="popup">
             <img class="popup-img" id="popup-img" src="" alt="Statut">
-            <div class="poem-box" id="popup-text" style="width: 100%;"></div>
+            <div class="poem-box" id="popup-text" style="width: 100%; max-height: 180px; overflow-y: auto;"></div>
             <div class="btn-zone">
                 <button class="btn btn-center" id="popup-btn" style="display:none;">Continuer</button>
             </div>
@@ -305,10 +285,7 @@
         if (!elem) return;
         const parentArea = elem.closest('.content-area');
         if (parentArea) {
-            parentArea.scrollTo({
-                top: parentArea.scrollHeight,
-                behavior: 'smooth'
-            });
+            parentArea.scrollTop = parentArea.scrollHeight;
         }
     }
 
@@ -336,7 +313,7 @@
         try {
             const music = document.getElementById('bg-music');
             if (music) {
-                music.play().catch(() => console.log("Audio en attente interaction."));
+                music.play().catch(() => {});
             }
         } catch (err) {}
 
@@ -344,7 +321,7 @@
         document.getElementById('screen2').classList.add('active');
         
         let introText = "Mais alors, comment réunir ces deux âmes solitaires égarées dans le tumulte du monde...\nImaginons, PK t'écrit...";
-        typeWriterProgressive("", introText, "poem1", 25, function() {
+        typeWriterProgressive("", introText, "poem1", 20, function() {
             document.getElementById('q1-text').style.display = "block";
             document.getElementById('choices1').style.display = "block";
         });
@@ -358,7 +335,7 @@
         popup.style.display = "flex";
         btn.style.display = "none"; 
         
-        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 25, function() {
+        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 20, function() {
             btn.style.display = "block"; 
         });
         grandPoeme += nouveauxVers;
@@ -382,7 +359,7 @@
         popup.style.display = "flex";
         btn.style.display = "none";
         
-        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 25, function() {
+        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 20, function() {
             btn.style.display = "block";
         });
         grandPoeme += nouveauxVers;
@@ -398,10 +375,6 @@
 
     function showAutreInput() {
         document.getElementById('autre-box').style.display = "block";
-        setTimeout(() => {
-            const container = document.getElementById('screen4').querySelector('.content-area');
-            if(container) container.scrollTop = container.scrollHeight;
-        }, 50);
     }
 
     function saveProgramme(val) {
@@ -413,7 +386,7 @@
         document.getElementById('screen5').classList.add('active');
         document.getElementById('game-container').classList.add('fond-fleurs');
         
-        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le destin attend son jour sacré... Choisis le jour)", "poem4", 25);
+        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le destin attend son jour sacré... Choisis le jour)", "poem4", 20);
         grandPoeme += nouveauxVers;
     }
 
@@ -429,7 +402,7 @@
         document.getElementById('screen5').classList.remove('active');
         document.getElementById('screen6').classList.add('active');
         
-        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le temps offre son absolu... Choisis ton heure)", "poem5", 25);
+        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le temps offre son absolu... Choisis ton heure)", "poem5", 20);
         grandPoeme += nouveauxVers;
     }
 
@@ -444,7 +417,7 @@
         let chuteFinale = nouveauxVers + 
                          "C'est ainsi que deux âmes se rencontrent, que les étoiles s'alignent et les cœurs s'emmêlent.\n" +
                          "Au plaisir de conclure cette histoire par : et ils sortirent ensemble et passèrent un merveilleux moment...";
-        typeWriterProgressive(grandPoeme, chuteFinale, "poemFinal", 25);
+        typeWriterProgressive(grandPoeme, chuteFinale, "poemFinal", 20);
     }
 
     function showGameOver(message) {
