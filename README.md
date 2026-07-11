@@ -2,66 +2,87 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>The Perfect Date Simulator</title>
     <style>
-        * { box-sizing: border-box; }
-        html, body {
+        /* Reset & Core Standards */
+        * { 
+            box-sizing: border-box; 
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
             width: 100%;
             height: 100%;
+            height: 100dvh; /* Utilisation du Viewport Dynamique pour bloquer les sauts de barre d'adresse */
             background: #0f172a;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
+            position: fixed; /* Empêche tout défilement parasite du fond sur iOS */
         }
+
         .wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
             height: 100%;
-            padding: 10px;
+            padding: 12px;
         }
+
+        /* Conteneur adaptatif intelligent (Responsive Fluide) */
         .game-container {
             position: relative;
             background-size: cover;
             background-position: center;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            background-repeat: no-repeat;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             width: 100%;
-            max-width: 380px;
+            max-width: 400px;
             height: 100%;
-            max-height: 620px;
+            max-height: 90dvh; /* S'adapte proportionnellement sans jamais dépasser l'écran visible */
             border: 2px solid rgba(244, 63, 94, 0.4);
             display: flex;
             flex-direction: column;
             padding: 20px;
-            transition: all 0.5s ease;
+            overflow: hidden;
+            background-color: #1e293b;
+            transition: background 0.4s ease, border-color 0.4s ease;
         }
+
+        /* Thème alternatif */
         .fond-fleurs {
             background: linear-gradient(135deg, #ffe4e6 0%, #fecdd3 100%) !important;
-            color: #4c0519 !important;
-            border: 2px solid #f43f5e;
+            border-color: #f43f5e !important;
         }
         .fond-fleurs p, .fond-fleurs h1, .fond-fleurs .poem-box, .fond-fleurs .question-text {
             color: #4c0519 !important;
+            text-shadow: none !important;
         }
+
+        /* Gestion des écrans du jeu */
         .screen { 
             display: none; 
             width: 100%; 
             height: 100%; 
             flex-direction: column; 
-            justify-content: space-between; 
         }
         .screen.active { 
             display: flex; 
         }
         
+        /* Zone de contenu principale : absorbe le surplus de taille dynamiquement */
         .content-area {
+            flex: 1 1 auto;
             overflow-y: auto;
-            max-height: 70%;
+            margin-bottom: 12px;
             padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch; /* Défilement fluide certifié iOS */
         }
         .content-area::-webkit-scrollbar { width: 4px; }
         .content-area::-webkit-scrollbar-thumb { background: rgba(244, 63, 94, 0.4); border-radius: 4px; }
@@ -70,81 +91,109 @@
             background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            padding: 14px;
+            padding: 16px;
             border-radius: 16px;
             font-style: italic;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             color: #fda4af;
             margin-bottom: 12px;
-            border-left: 3px solid #f43f5e;
-            text-align: left;
+            border-left: 4px solid #f43f5e;
             white-space: pre-line;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .fond-fleurs .poem-box {
             background: rgba(255, 255, 255, 0.75);
-            border-left: 3px solid #e11d48;
+            border-left-color: #e11d48;
         }
+
         .question-text {
             font-weight: 600;
             font-size: 14px;
-            margin-bottom: 10px;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
-        }
-        .fond-fleurs .question-text {
-            text-shadow: none;
+            line-height: 1.4;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
+        /* Zone des boutons : préservée à 100% contre l'écrasement */
         .btn-zone {
             width: 100%;
+            flex-shrink: 0;
             margin-top: auto;
-            padding-top: 10px;
         }
+
         .btn {
             display: block;
             width: 100%;
-            padding: 11px 14px;
-            margin: 6px 0;
+            padding: 12px 16px;
+            margin: 8px 0;
             background: rgba(30, 41, 59, 0.95);
-            color: white;
+            color: #ffffff;
             border: 1px solid rgba(244, 63, 94, 0.4);
-            border-radius: 15px;
+            border-radius: 16px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 13.5px;
+            font-weight: 500;
             text-align: left;
-            transition: all 0.2s;
+            line-height: 1.4;
+            transition: background 0.2s, transform 0.1s;
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-center { text-align: center; font-weight: bold; background: linear-gradient(90deg, #ec4899 0%, #f43f5e 100%); border: none; }
+        .btn:active { 
+            transform: scale(0.98); 
+            background: rgba(244, 63, 94, 0.2);
+        }
+        .btn-center { 
+            text-align: center; 
+            font-weight: 700; 
+            background: linear-gradient(90deg, #ec4899 0%, #f43f5e 100%); 
+            border: none; 
+        }
+        .btn-center:active {
+            background: linear-gradient(90deg, #db2777 0%, #e11d48 100%);
+        }
         .fond-fleurs .btn {
             background: rgba(255, 255, 255, 0.95);
             color: #4c0519;
             border: 1px solid #fda4af;
         }
+        .fond-fleurs .btn:active {
+            background: #ffe4e6;
+        }
         
         input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             margin: 8px 0;
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid #fda4af;
             font-size: 15px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             color: #4c0519;
+            outline: none;
+            font-family: inherit;
         }
         
+        /* Interface Modale (Popups d'état) */
         .popup-overlay {
             display: none;
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95);
-            padding: 20px;
+            background: rgba(15, 23, 42, 0.98);
+            padding: 24px;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
         }
-        .popup-img { width: 100%; max-height: 180px; border-radius: 15px; object-fit: cover; margin-bottom: 15px; }
+        .popup-img { 
+            width: 100%; 
+            max-height: 160px; 
+            border-radius: 16px; 
+            object-fit: cover; 
+            margin-bottom: 16px; 
+            background: #334155; /* Fallback si l'image serveur ne charge pas */
+        }
     </style>
 </head>
 <body>
@@ -155,10 +204,10 @@
     <div class="game-container" id="game-container" style="background-image: url('accueil .png');">
 
         <div class="screen active" id="screen1" style="justify-content: center;">
-            <div style="margin-bottom: 40px;">
-                <h1 style="font-size: 24px; color: #f43f5e; text-shadow: 0 0 12px rgba(0,0,0,0.9); text-align: center; background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 15px; margin: 0;">The Perfect Date Simulator</h1>
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 24px; color: #f43f5e; text-shadow: 0 2px 12px rgba(0,0,0,0.9); text-align: center; background: rgba(15, 23, 42, 0.7); padding: 16px; border-radius: 16px; margin: 0;">The Perfect Date Simulator</h1>
             </div>
-            <div>
+            <div class="btn-zone">
                 <button class="btn btn-center" onclick="startGame()">Lancer la partie 🎮</button>
             </div>
         </div>
@@ -209,7 +258,7 @@
                 <div class="poem-box" id="poem4"></div>
                 <div class="question-text">Quel jour le destin doit-il inscrire dans notre histoire ?</div>
             </div>
-            <div class="btn-zone" style="margin-bottom: 10px;">
+            <div class="btn-zone">
                 <input type="date" id="jourInput">
                 <button class="btn btn-center" onclick="saveJour()">Continuer ➡️</button>
             </div>
@@ -220,7 +269,7 @@
                 <div class="poem-box" id="poem5"></div>
                 <div class="question-text">À quelle heure le temps devrait-il s'arrêter pour nous ?</div>
             </div>
-            <div class="btn-zone" style="margin-bottom: 10px;">
+            <div class="btn-zone">
                 <input type="time" id="heureInput">
                 <button class="btn btn-center" onclick="saveHeure()">Calculer l'alignement des étoiles ✨</button>
             </div>
@@ -230,15 +279,17 @@
             <div class="content-area">
                 <div class="poem-box" id="poemFinal"></div>
             </div>
-            <div class="btn-zone" style="margin-bottom: 10px;">
+            <div class="btn-zone">
                 <button class="btn btn-center" onclick="sendWhatsApp()">Fin de l'histoire ❤️</button>
             </div>
         </div>
 
         <div class="popup-overlay" id="popup">
             <img class="popup-img" id="popup-img" src="" alt="Statut">
-            <div class="poem-box" id="popup-text"></div>
-            <button class="btn btn-center" id="popup-btn" style="display:none;">Continuer</button>
+            <div class="poem-box" id="popup-text" style="width: 100%;"></div>
+            <div class="btn-zone">
+                <button class="btn btn-center" id="popup-btn" style="display:none;">Continuer</button>
+            </div>
         </div>
 
     </div>
@@ -250,6 +301,17 @@
     let choixJour = "";
     let grandPoeme = ""; 
 
+    function scrollContentArea(elem) {
+        if (!elem) return;
+        const parentArea = elem.closest('.content-area');
+        if (parentArea) {
+            parentArea.scrollTo({
+                top: parentArea.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }
+
     function typeWriterProgressive(baseText, newText, elementId, speed, callback) {
         const elem = document.getElementById(elementId);
         if(!elem) return;
@@ -260,31 +322,29 @@
             if (i < newText.length) {
                 elem.innerHTML += newText.charAt(i);
                 i++;
+                scrollContentArea(elem);
                 setTimeout(type, speed);
             } else if (callback) {
                 callback();
+                scrollContentArea(elem);
             }
         }
         type();
     }
 
     function startGame() {
-        // CORRECTION : L'audio est mis en try...catch sécurisé pour empêcher tout blocage du jeu
         try {
             const music = document.getElementById('bg-music');
             if (music) {
-                music.play().catch(e => console.log("Lecture audio différée ou bloquée par le navigateur."));
+                music.play().catch(() => console.log("Audio en attente interaction."));
             }
-        } catch (err) {
-            console.log("Audio non supporté ou introuvable.");
-        }
+        } catch (err) {}
 
-        // Changement d'écran immédiat
         document.getElementById('screen1').classList.remove('active');
         document.getElementById('screen2').classList.add('active');
         
         let introText = "Mais alors, comment réunir ces deux âmes solitaires égarées dans le tumulte du monde...\nImaginons, PK t'écrit...";
-        typeWriterProgressive("", introText, "poem1", 35, function() {
+        typeWriterProgressive("", introText, "poem1", 25, function() {
             document.getElementById('q1-text').style.display = "block";
             document.getElementById('choices1').style.display = "block";
         });
@@ -298,7 +358,7 @@
         popup.style.display = "flex";
         btn.style.display = "none"; 
         
-        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 35, function() {
+        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 25, function() {
             btn.style.display = "block"; 
         });
         grandPoeme += nouveauxVers;
@@ -322,7 +382,7 @@
         popup.style.display = "flex";
         btn.style.display = "none";
         
-        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 35, function() {
+        typeWriterProgressive(grandPoeme, nouveauxVers, "popup-text", 25, function() {
             btn.style.display = "block";
         });
         grandPoeme += nouveauxVers;
@@ -338,10 +398,14 @@
 
     function showAutreInput() {
         document.getElementById('autre-box').style.display = "block";
+        setTimeout(() => {
+            const container = document.getElementById('screen4').querySelector('.content-area');
+            if(container) container.scrollTop = container.scrollHeight;
+        }, 50);
     }
 
     function saveProgramme(val) {
-        if(!val) return;
+        if(!val || val.trim() === "") return;
         choixProgramme = val;
         let nouveauxVers = `Pour unique décor, tu as choisi : ${choixProgramme},\nDouce halte secrète où nos regards s'enflamment.\n`;
         
@@ -349,7 +413,7 @@
         document.getElementById('screen5').classList.add('active');
         document.getElementById('game-container').classList.add('fond-fleurs');
         
-        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le destin attend son jour sacré... Choisis le jour)", "poem4", 35);
+        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le destin attend son jour sacré... Choisis le jour)", "poem4", 25);
         grandPoeme += nouveauxVers;
     }
 
@@ -365,7 +429,7 @@
         document.getElementById('screen5').classList.remove('active');
         document.getElementById('screen6').classList.add('active');
         
-        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le temps offre son absolu... Choisis ton heure)", "poem5", 35);
+        typeWriterProgressive(grandPoeme, nouveauxVers + "\n(Le temps offre son absolu... Choisis ton heure)", "poem5", 25);
         grandPoeme += nouveauxVers;
     }
 
@@ -380,7 +444,7 @@
         let chuteFinale = nouveauxVers + 
                          "C'est ainsi que deux âmes se rencontrent, que les étoiles s'alignent et les cœurs s'emmêlent.\n" +
                          "Au plaisir de conclure cette histoire par : et ils sortirent ensemble et passèrent un merveilleux moment...";
-        typeWriterProgressive(grandPoeme, chuteFinale, "poemFinal", 35);
+        typeWriterProgressive(grandPoeme, chuteFinale, "poemFinal", 25);
     }
 
     function showGameOver(message) {
