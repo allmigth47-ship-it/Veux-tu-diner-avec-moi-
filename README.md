@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>The Perfect Date Simulator</title>
     <style>
         * { 
@@ -14,23 +14,23 @@
         
         html, body {
             width: 100%;
-            height: 100%;
-            height: 100dvh;
+            min-height: 100%;
             background: #0f172a;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden;
-            position: fixed;
+            /* Permet le défilement naturel de toute la page si le contenu déborde */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
         }
 
         .wrapper {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Aligné en haut pour permettre au scroll de descendre naturellement */
             width: 100%;
-            height: 100%;
-            padding: 12px;
+            padding: 16px;
         }
 
+        /* Conteneur 100% fluide et flexible */
         .game-container {
             position: relative;
             background-size: cover;
@@ -39,14 +39,14 @@
             border-radius: 24px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             width: 100%;
-            max-width: 380px;
-            height: 85dvh; /* Hauteur stable */
-            border: 2px solid rgba(244, 63, 94, 0.4);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            overflow: hidden;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 24px;
             background-color: #1e293b;
+            transition: background 0.4s ease;
+            
+            /* LE SECRET : Un padding en bas pour laisser de la place aux boutons lors du swipe */
+            padding-bottom: 80px; 
         }
 
         .fond-fleurs {
@@ -58,27 +58,15 @@
             text-shadow: none !important;
         }
 
+        /* Les écrans s'adaptent simplement à la hauteur de leur contenu */
         .screen { 
             display: none; 
-            width: 100%; 
-            height: 100%; 
+            width: 100%;
             flex-direction: column;
-            overflow: hidden;
         }
         .screen.active { 
             display: flex; 
         }
-        
-        /* Conteneur avec hauteur maximale stricte pour empêcher l'extension */
-        .content-area {
-            height: 200px; /* Limite la zone de texte pour laisser la place aux boutons */
-            overflow-y: auto;
-            margin-bottom: 12px;
-            padding-right: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .content-area::-webkit-scrollbar { width: 4px; }
-        .content-area::-webkit-scrollbar-thumb { background: rgba(244, 63, 94, 0.4); border-radius: 4px; }
 
         .poem-box {
             background: rgba(15, 23, 42, 0.85);
@@ -87,10 +75,10 @@
             padding: 16px;
             border-radius: 16px;
             font-style: italic;
-            font-size: 14px;
+            font-size: 14.5px;
             line-height: 1.6;
             color: #fda4af;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             border-left: 4px solid #f43f5e;
             white-space: pre-line;
         }
@@ -101,35 +89,36 @@
 
         .question-text {
             font-weight: 600;
-            font-size: 13.5px;
-            line-height: 1.4;
+            font-size: 14px;
+            line-height: 1.5;
             color: #ffffff;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         
         .btn-zone {
             width: 100%;
-            margin-top: auto;
+            margin-top: 8px;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 12px 14px;
-            margin: 6px 0;
+            padding: 14px 16px;
+            margin: 8px 0;
             background: rgba(30, 41, 59, 0.95);
             color: #ffffff;
             border: 1px solid rgba(244, 63, 94, 0.4);
             border-radius: 16px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 13.5px;
             text-align: left;
             line-height: 1.4;
-            transition: all 0.2s;
+            transition: background 0.2s, transform 0.1s;
         }
         .btn:active { 
-            transform: scale(0.98); 
+            transform: scale(0.99); 
+            background: rgba(244, 63, 94, 0.2);
         }
         .btn-center { 
             text-align: center; 
@@ -145,7 +134,7 @@
         
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin: 8px 0;
             border-radius: 14px;
             border: 1px solid #fda4af;
@@ -157,7 +146,7 @@
         
         .popup-overlay {
             display: none;
-            position: absolute;
+            position: fixed; /* Reste bien au-dessus de tout l'écran */
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.98);
             padding: 24px;
@@ -165,14 +154,15 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
+            overflow-y: auto;
         }
         .popup-img { 
             width: 100%; 
-            max-height: 150px; 
+            max-width: 320px;
+            max-height: 160px; 
             border-radius: 16px; 
             object-fit: cover; 
             margin-bottom: 16px; 
-            background: #334155;
         }
     </style>
 </head>
@@ -183,8 +173,8 @@
 <div class="wrapper">
     <div class="game-container" id="game-container" style="background-image: url('accueil .png');">
 
-        <div class="screen active" id="screen1" style="justify-content: center;">
-            <div style="margin-bottom: 32px;">
+        <div class="screen active" id="screen1">
+            <div style="margin: 40px 0 24px 0;">
                 <h1 style="font-size: 24px; color: #f43f5e; text-shadow: 0 2px 12px rgba(0,0,0,0.9); text-align: center; background: rgba(15, 23, 42, 0.7); padding: 16px; border-radius: 16px; margin: 0;">The Perfect Date Simulator</h1>
             </div>
             <div class="btn-zone">
@@ -193,10 +183,8 @@
         </div>
 
         <div class="screen" id="screen2">
-            <div class="content-area">
-                <div class="poem-box" id="poem1"></div>
-                <div class="question-text" id="q1-text" style="display:none;">Imaginons, PK t'écrit... Que fais-tu ?</div>
-            </div>
+            <div class="poem-box" id="poem1"></div>
+            <div class="question-text" id="q1-text" style="display:none;">Imaginons, PK t'écrit... Que fais-tu ?</div>
             <div class="btn-zone" id="choices1" style="display:none;">
                 <button class="btn" onclick="validerEtape1()">A. Je réponds direct je suis trop contente qu'il m'ai écrit (j'espère pour toi 😑❤)</button>
                 <button class="btn" onclick="showGameOver('Tu as encore mal à l\'oreille c\'est ça? 😭 quelqu\'un va te rendre !')">B. Je suis occupée je vais répondre plus tard</button>
@@ -205,10 +193,8 @@
         </div>
 
         <div class="screen" id="screen3">
-            <div class="content-area">
-                <div class="poem-box" id="poem2"></div>
-                <div class="question-text" id="q2-text" style="display:none;">PK sait que tu es timide et que tu ne marches pas sans ta Cecile... mais il prend son courage à 2 mains et t'invite seule...</div>
-            </div>
+            <div class="poem-box" id="poem2"></div>
+            <div class="question-text" id="q2-text" style="display:none;">PK sait que tu es timide et que tu ne marches pas sans ta Cecile... mais il prend son courage à 2 mains et t'invite seule...</div>
             <div class="btn-zone" id="choices2" style="display:none;">
                 <button class="btn" onclick="showGameOver('😭 faut doser norh je devais faire comment')">A. Tu refuses ; trop tard ton anniversaire est passé qu'il aille en brousse</button>
                 <button class="btn" onclick="showGameOver('😔 werrhh combat la timidité là norhh pardon')">B. Tu fuis parce que tu as pas envie de répondre tu es mal à l'aise</button>
@@ -217,10 +203,8 @@
         </div>
 
         <div class="screen" id="screen4">
-            <div class="content-area">
-                <div class="poem-box" id="poem3"></div>
-                <div class="question-text">Si tu étais celle qui emmènerait une fleur comme toi dehors, que ferais-tu ?</div>
-            </div>
+            <div class="poem-box" id="poem3"></div>
+            <div class="question-text">Si tu étais celle qui emmènerait une fleur comme toi dehors, que ferais-tu ?</div>
             <div class="btn-zone">
                 <button class="btn" onclick="saveProgramme('un ciné date 🎬')">A. Un ciné date (pas mal en soi mais... quel film 😭❤)</button>
                 <button class="btn" onclick="saveProgramme('un restaurant en tête-à-tête 🍕')">B. Restaurant, belle ambiance nous deux et un peu d'effort (il a intérêt à réussir ! 😭)</button>
@@ -234,10 +218,8 @@
         </div>
 
         <div class="screen" id="screen5">
-            <div class="content-area">
-                <div class="poem-box" id="poem4"></div>
-                <div class="question-text">Quel jour le destin doit-il inscrire dans notre histoire ?</div>
-            </div>
+            <div class="poem-box" id="poem4"></div>
+            <div class="question-text">Quel jour le destin doit-il inscrire dans notre histoire ?</div>
             <div class="btn-zone">
                 <input type="date" id="jourInput">
                 <button class="btn btn-center" onclick="saveJour()">Continuer ➡️</button>
@@ -245,10 +227,8 @@
         </div>
 
         <div class="screen" id="screen6">
-            <div class="content-area">
-                <div class="poem-box" id="poem5"></div>
-                <div class="question-text">À quelle heure le temps devrait-il s'arrêter pour nous ?</div>
-            </div>
+            <div class="poem-box" id="poem5"></div>
+            <div class="question-text">À quelle heure le temps devrait-il s'arrêter pour nous ?</div>
             <div class="btn-zone">
                 <input type="time" id="heureInput">
                 <button class="btn btn-center" onclick="saveHeure()">Calculer l'alignement des étoiles ✨</button>
@@ -256,9 +236,7 @@
         </div>
 
         <div class="screen" id="screen7">
-            <div class="content-area">
-                <div class="poem-box" id="poemFinal"></div>
-            </div>
+            <div class="poem-box" id="poemFinal"></div>
             <div class="btn-zone">
                 <button class="btn btn-center" onclick="sendWhatsApp()">Fin de l'histoire ❤️</button>
             </div>
@@ -266,8 +244,8 @@
 
         <div class="popup-overlay" id="popup">
             <img class="popup-img" id="popup-img" src="" alt="Statut">
-            <div class="poem-box" id="popup-text" style="width: 100%; max-height: 180px; overflow-y: auto;"></div>
-            <div class="btn-zone">
+            <div class="poem-box" id="popup-text" style="width: 100%; max-width: 360px;"></div>
+            <div class="btn-zone" style="max-width: 360px;">
                 <button class="btn btn-center" id="popup-btn" style="display:none;">Continuer</button>
             </div>
         </div>
@@ -281,12 +259,12 @@
     let choixJour = "";
     let grandPoeme = ""; 
 
-    function scrollContentArea(elem) {
-        if (!elem) return;
-        const parentArea = elem.closest('.content-area');
-        if (parentArea) {
-            parentArea.scrollTop = parentArea.scrollHeight;
-        }
+    // Fait défiler automatiquement TOUTE la page vers le bas pendant que le texte s'écrit
+    function scrollToBottom() {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     function typeWriterProgressive(baseText, newText, elementId, speed, callback) {
@@ -299,11 +277,11 @@
             if (i < newText.length) {
                 elem.innerHTML += newText.charAt(i);
                 i++;
-                scrollContentArea(elem);
+                scrollToBottom();
                 setTimeout(type, speed);
             } else if (callback) {
                 callback();
-                scrollContentArea(elem);
+                setTimeout(scrollToBottom, 50);
             }
         }
         type();
@@ -375,6 +353,7 @@
 
     function showAutreInput() {
         document.getElementById('autre-box').style.display = "block";
+        setTimeout(scrollToBottom, 50);
     }
 
     function saveProgramme(val) {
